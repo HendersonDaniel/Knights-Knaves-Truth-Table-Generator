@@ -35,6 +35,18 @@ function implies(a, b) {
   return !a || b;
 }
 
+function evaluateInnermostParentheses(exp, values) {
+  const parenRegex = /\(([^()]+)\)/; // This matches the innermost parentheses
+
+  while (parenRegex.test(exp)) {
+      let match = exp.match(parenRegex);
+      let innerResult = evaluateExpressionWithoutParens(match[1], values); 
+      exp = exp.replace(match[0], String(innerResult)); // Ensure innerResult is cast to string for proper replacement
+  }
+
+  return exp;
+}
+
 function handleIFF(exp) {
   const matchesRegex = /([a-zA-Z0-9_]+)\s*=\s*([a-zA-Z0-9_]+|\([^)]*\))/;
   while (matchesRegex.test(exp)) {
@@ -46,30 +58,34 @@ function handleIFF(exp) {
 }
 
 function handleXor(exp) {
-  const xorRegex = /\b(?:(\w+)|\(([^)]+)\))\s*xor\s*(?:(\w+)|\(([^)]+)\))\b/;
+  const xorRegex = /(\w+|\([^)]+\))\s*xor\s*(\w+|\([^)]+\))/;
   while (xorRegex.test(exp)) {
-      exp = exp.replace(xorRegex, (match, leftVar1, leftVar2, rightVar1, rightVar2) => {
-          const leftOperand = leftVar1 || `(${leftVar2})`;
-          const rightOperand = rightVar1 || `(${rightVar2})`;
-          return `xor(${leftOperand}, ${rightOperand})`;
+      exp = exp.replace(xorRegex, (match, leftVar, rightVar) => {
+          return `xor(${leftVar.trim()}, ${rightVar.trim()})`;
       });
   }
   return exp;
 }
 
 function handleImplies(exp) {
-  const impliesRegex = /\b(?:(\w+)|\(([^)]+)\))\s*->\s*(?:(\w+)|\(([^)]+)\))\b/;
-  while (impliesRegex.test(exp)) {
-      exp = exp.replace(impliesRegex, (match, leftVar1, leftVar2, rightVar1, rightVar2) => {
-          const leftOperand = leftVar1 || `(${leftVar2})`;
-          const rightOperand = rightVar1 || `(${rightVar2})`;
-          return `implies(${leftOperand}, ${rightOperand})`;
-      });
+  const impliesRegex = /(\b\w+\b|\(.*?\))\s*->\s*(\b\w+\b|\(.*?\))/g; 
+  let newExp = '';
+  let lastEndIndex = 0;
+
+  let match;
+  while (match = impliesRegex.exec(exp)) {
+      const leftOperand = match[1];
+      const rightOperand = match[2];
+      newExp += exp.substring(lastEndIndex, match.index) + `implies(${leftOperand}, ${rightOperand})`;
+      lastEndIndex = match.index + match[0].length;
   }
-  return exp;
+  newExp += exp.substring(lastEndIndex);
+  
+  return newExp;
 }
 
-function evaluateExpression(expression, values) {
+
+function evaluateExpressionWithoutParens(expression, values) {
   let exp = expression;
 
   exp = handleXor(exp);
@@ -84,19 +100,25 @@ function evaluateExpression(expression, values) {
 
   // Replace variable values after replacing operators
   for (let key in values) {
-      if(!['xor', 'and', 'or', 'iff', '->', '='].includes(key)) {
-      exp = exp.replace(new RegExp('\\b' + key + '\\b', 'g'), String(values[key]));
-    }
+      if (!['xor', 'and', 'or', 'iff', '->', '='].includes(key)) {
+          exp = exp.replace(new RegExp('\\b' + key + '\\b', 'g'), String(values[key]));
+      }
   }
 
   console.log("Evaluating:", exp);
 
+  // Using IIFE to evaluate the expression, passing helper functions as arguments
   try {
-      return eval(exp);
+      return eval(`(function(xor, iff, implies) { return ${exp}; })`)(xor, iff, implies);
   } catch (e) {
       console.error(`Failed to evaluate expression "${expression}":`, e);
       return false;
   }
+}
+
+function evaluateExpression(expression, values) {
+  let expWithoutParens = evaluateInnermostParentheses(expression, values);
+  return evaluateExpressionWithoutParens(expWithoutParens, values);
 }
 
 function isValidExpression(expression) {
