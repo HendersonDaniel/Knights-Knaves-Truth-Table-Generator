@@ -1,27 +1,136 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-  <title>document</title>
+  <title>Truth Table Generator</title>
   <style>
-    #list {
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f7f7f7;
+    }
+
+    #container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #fff;
+      border-radius: 10px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    }
+
+    #header {
+      background-color: #007BFF;
+      color: #fff;
+      padding: 20px;
+      border-radius: 10px 10px 0 0;
+      text-align: center;
+    }
+
+    #header h1 {
+      margin: 0;
+      font-size: 36px;
+      font-weight: bold;
+    }
+
+    #guide {
+      background-color: #0056b3;
+      color: #fff;
+      padding: 20px;
+      border-radius: 0 0 10px 10px;
+      text-align: center;
+    }
+
+    #guide p {
+      margin: 0;
+      font-size: 16px;
+    }
+
+    #guide ul {
       list-style: none;
       padding: 0;
+    }
+
+    #guide li {
+      font-size: 14px;
+      margin: 8px 0;
+    }
+
+    #form-container {
+      background-color: #fff;
+      border-radius: 10px;
+      padding: 20px;
+      margin-top: 20px;
+    }
+
+    #new-task-form {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    #new-task-title {
+      padding: 12px;
+      font-size: 18px;
+      border: 2px solid #007BFF;
+      border-radius: 4px;
+      outline: none;
+    }
+
+    button[type="submit"] {
+      padding: 12px;
+      background-color: #007BFF;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    button[type="submit"]:hover {
+      background-color: #0056b3;
+    }
+
+    #note {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 14px;
+      color: #777;
     }
   </style>
 </head>
 <body>
-  <ul id="list"></ul>
-  <form id="new-task-form">
-    <input type="text" id="new-task-title" placeholder="Ex: a iff (a or b)">
-    <button type="submit">Create Truthtable</button>
-  </form>
-  
-
+  <div id="container">
+    <div id="header">
+      <h1>Truth Table Generator</h1>
+    </div>
+    <div id="guide">
+      <p>Truth Table Notation Guide:</p>
+      <ul>
+        <li><strong>a or b</strong> - Logical OR</li>
+        <li><strong>a and b</strong> - Logical AND</li>
+        <li><strong>a xor b</strong> - Logical XOR</li>
+        <li><strong>a = b</strong> - Logical IFF (if and only if)</li>
+        <li><strong>a -> b</strong> - Logical Implication</li>
+        <li><strong>true</strong> - True constant</li>
+        <li><strong>false</strong> - False constant</li>
+        <li>Use parentheses for grouping, e.g., <strong>(a or b) and c</strong></li>
+      </ul>
+    </div>
+    <div id="form-container">
+      <form id="new-task-form">
+        <input type="text" id="new-task-title" placeholder="Enter truth table notation">
+        <button type="submit">Generate Truth Table</button>
+      </form>
+    </div>
+    <div id="note">
+      <p>Note: Ensure spaces between variables and logical operands (e.g., "a and b").</p>
+      <p>Designed for COMP 283 at UNC Chapel Hill</p>
+    </div>
+  </div>
 </body>
 <script src="./node_modules/xlsx/xlsx.js"></script>
 <script src="script.js"></script>
